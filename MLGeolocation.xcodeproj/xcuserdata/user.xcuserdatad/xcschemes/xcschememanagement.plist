@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>MLGeolocation.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>CEF4244F1CDC7ADA0086BDC4</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>CEF424681CDC7ADC0086BDC4</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>CEF424731CDC7ADC0086BDC4</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
