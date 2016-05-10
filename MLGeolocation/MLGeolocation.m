@@ -15,8 +15,6 @@
 {
     
     CLLocationManager * locationManager;
-    //当前位置名
-    NSString *loc_name;
     
     void (^sucBlock)(NSDictionary *loc);
     void (^errorBlock)(NSError *error);
@@ -115,7 +113,7 @@ static MLGeolocation *geo;
     CLLocation *currLocation = [[CLLocation alloc]initWithLatitude:((CLLocation *)[locations firstObject]).coordinate.latitude longitude:((CLLocation *)[locations firstObject]).coordinate.longitude];
     
     if (![AmendCoordinate isLocationOutOfChina:[currLocation coordinate]]) {
-        //坐标校准
+        //坐标校准(根据自己所用地图而定)
         CLLocationCoordinate2D coord_gcj = [AmendCoordinate transformFromWGSToGCJ:[currLocation coordinate]];
         CLLocationCoordinate2D coord_bd9 = [AmendCoordinate transformFromGCJToBD:coord_gcj];
         
@@ -127,8 +125,9 @@ static MLGeolocation *geo;
     }
 }
 
+//关闭定位
 - (void)stopUpdatingLocation{
-    [locationManager stopUpdatingLocation];//关闭定位
+    [locationManager stopUpdatingLocation];
 }
 
 //定位失败，回调此方法
@@ -140,12 +139,12 @@ static MLGeolocation *geo;
             errorBlock(error);
         }];
     }else {
-    errorBlock(error);
-    if ([error code]==kCLErrorDenied) {
-        NSLog(@"访问被拒绝");
+        errorBlock(error);
+        if ([error code]==kCLErrorDenied) {
+            NSLog(@"访问被拒绝");
         }
-    if ([error code]==kCLErrorLocationUnknown) {
-        NSLog(@"无法获取位置信息");
+        if ([error code]==kCLErrorLocationUnknown) {
+            NSLog(@"无法获取位置信息");
         }
     }
 }
@@ -156,7 +155,6 @@ static MLGeolocation *geo;
     if (![ipAdr isEqualToString:IP]) {
         IP = ipAdr;
     }
-    
     if (AK.length > 0) {
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     
@@ -176,61 +174,66 @@ static MLGeolocation *geo;
     }
 }
 
-//获取当前城市名
-- (void)getCurrentCity:(void(^)(NSMutableDictionary *locDic))locName error:(void(^)(NSError *))cityError{
-    [self getCity:^(NSMutableDictionary *citys) {
-         locName(citys);
-        [self stopUpdatingLocation];
-    } error:^(NSError *error) {
-        cityError(error);
-        [self stopUpdatingLocation];
-    }];
-}
+#pragma mark <获取坐标位置>
 
-//获取位置坐标
-- (void)getCurrentCor:(NSString *)locName  block:(void(^)(CGFloat corLat,CGFloat corLon))coorDic{
-    loc_name = locName;
-    [self getLoc:^(CGFloat lat, CGFloat lon) {
-        coorDic(lat,lon);
-    }];
-}
-
-//逆编码获取当前城市名
-- (void)getCity:(void(^)(NSMutableDictionary *citys))cityName error:(void(^)(NSError *error))locError{
-    //使用地理位置 逆向编码拿到位置信息
-    CLGeocoder * geocoder = [[CLGeocoder alloc]init];
+//逆编码获取当前坐标信息
+- (void)getCurrentAddress:(void(^)(NSMutableDictionary *citys))address error:(void(^)(NSError *error))locError{
     //通过数据源拿到当前位置
+    __weak typeof(self)weak_self = self;
     [self getCurrentLocations:^(NSDictionary *curLoc) {
-        CLLocation * currentLoc = [[CLLocation alloc]initWithLatitude:[[curLoc  objectForKey:@"lat"] doubleValue] longitude:[[curLoc objectForKey:@"long"] doubleValue]];
-        
+        [weak_self getLocAddress:[curLoc objectForKey:@"lat"] withLon:[curLoc objectForKey:@"long"] address:^(NSMutableDictionary *citys) {
+            address(citys);
+            [self stopUpdatingLocation];
+        } error:^(NSError *error) {
+            locError(error);
+            [self stopUpdatingLocation];
+        }];
+    } isIPOrientation:NO error:^(NSError *error) {
+        locError(error);
+    }];
+}
+
+//逆编码获取坐标信息
+- (void)getLocAddress:(NSString *)lat withLon:(NSString *)lon address:(void(^)(NSMutableDictionary *citys))address error:(void(^)(NSError *error))getFail{
+    //使用地理位置 逆向编码拿到位置信息
+    if (lat != nil && lon != nil) {
+        CLGeocoder * geocoder = [[CLGeocoder alloc]init];
+        CLLocation * currentLoc = [[CLLocation alloc]initWithLatitude:[lat floatValue] longitude:[lon floatValue]];
         [geocoder reverseGeocodeLocation:currentLoc completionHandler:^(NSArray *placemarks, NSError *error) {
             //逆编码完毕以后调用此block
             if (!error) {
                 CLPlacemark * placeMark = placemarks[0];
-                NSMutableDictionary *locDicationary = [[NSMutableDictionary alloc]initWithObjectsAndKeys:[curLoc  objectForKey:@"lat"],@"lat", [curLoc objectForKey:@"long"], @"long",placeMark.country,@"country", [placeMark.addressDictionary objectForKey:@"State"],@"State",placeMark.locality,@"city",placeMark.subLocality,@"subLocality",placeMark.thoroughfare,@"thoroughfare",placeMark.name,@"street",nil];
-                cityName(locDicationary);
+                NSMutableDictionary *locDicationary = [[NSMutableDictionary alloc]initWithObjectsAndKeys:lat,@"lat", lon, @"long",placeMark.country,@"country", [placeMark.addressDictionary objectForKey:@"State"],@"State",placeMark.locality,@"city",placeMark.subLocality,@"subLocality",placeMark.thoroughfare,@"thoroughfare",placeMark.name,@"street",nil];
+                address(locDicationary);
                 //获取当前地址城市名
             }else{
                 NSLog(@"逆编码失败");
             }}];
-    } isIPOrientation:NO error:^(NSError *error) {
-        locError(error);
-        NSLog(@"定位失败");
+    }
+}
+
+#pragma mark <获取位置坐标>
+
+//获取位置坐标
+- (void)getCurrentCor:(NSString *)locName  block:(void(^)(CGFloat corLat,CGFloat corLon))coorDic error:(void(^)(NSError *error))fail{
+    [self getLoc:locName success:^(CGFloat lat, CGFloat lon) {
+        coorDic(lat, lon);
+    }fail:^(NSError *error) {
+        fail(error);
     }];
 }
 
 //逆编码获取位置坐标
-- (void)getLoc:(void (^)(CGFloat lat, CGFloat lon))coordinate{
+- (void)getLoc:(NSString *)address  success:(void (^)(CGFloat lat, CGFloat lon))coordinate fail:(void(^)(NSError *error))fail {
     //使用地理位置 逆向编码拿到位置信息
     CLGeocoder * geocoder = [[CLGeocoder alloc]init];
     //逆编码当前位置
-    [geocoder geocodeAddressString:loc_name completionHandler:^(NSArray *placemarks, NSError *error) {
+    [geocoder geocodeAddressString:address completionHandler:^(NSArray *placemarks, NSError *error) {
         if (!error) {
             CLPlacemark * placeMark = placemarks[0];
-            NSLog(@"%f %f",placeMark.location.coordinate.latitude,placeMark.location.coordinate.longitude);
             coordinate(placeMark.location.coordinate.latitude,placeMark.location.coordinate.longitude);
         }else {
-            NSLog(@"逆编码失败");
+            fail(error);
         }}];
 }
 

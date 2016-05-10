@@ -47,12 +47,18 @@ typedef NS_ENUM(NSInteger, MLLocationDistance) {
 /**
  获取当前坐标点的位置信息，字典包含lat(纬度)，long(经度)， country(国家)，State(省)，city(城市)，subLocality(城区)，thoroughfare(大道)，street(街道)
  */
-- (void)getCurrentCity:(void(^)(NSMutableDictionary *locDic))locName error:(void(^)(NSError *error))cityError;
+- (void)getCurrentAddress:(void(^)(NSMutableDictionary *citys))address error:(void(^)(NSError *error))locError;
+
+
+/**
+ 获取坐标点的位置信息，字典包含lat(纬度)，long(经度)， country(国家)，State(省)，city(城市)，subLocality(城区)，thoroughfare(大道)，street(街道)
+ */
+- (void)getLocAddress:(NSString *)lat withLon:(NSString *)lon address:(void(^)(NSMutableDictionary *citys))address error:(void(^)(NSError *error))getFail;
 
 /**
  获取当前地点的具体坐标
  */
-- (void)getCurrentCor:(NSString *)locName  block:(void(^)(CGFloat corLat,CGFloat corLon))coorDic;
+- (void)getCurrentCor:(NSString *)locName  block:(void(^)(CGFloat corLat,CGFloat corLon))coorDic error:(void(^)(NSError *error))fail;
 
 /**
  停止定位

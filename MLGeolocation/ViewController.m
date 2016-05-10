@@ -21,17 +21,30 @@
     //开启IP定位之前必须实现
     //[[MLGeolocation geolocation] setIPAddress:@"" withAK:@""];
     
+//    [[MLGeolocation geolocation] getCurrentCor:@"" block:^(CGFloat corLat, CGFloat corLon) {
+//        NSLog(@"%lf %lf", corLat, corLon);
+//    } error:^(NSError *error) {
+//        
+//    }];
+    
     [[MLGeolocation geolocation] getCurrentLocations:^(NSDictionary *curLoc) {
-        NSLog(@"%@",curLoc);
+        NSLog(@"%@", curLoc);
     } isIPOrientation:NO error:^(NSError *error) {
         
     }];
     
-    [[MLGeolocation geolocation] getCurrentCity:^(NSMutableDictionary *locDic) {
-        NSLog(@"%@",locDic);
-    } error:^(NSError *error) {
-        
-    }];
+    
+//    [[MLGeolocation geolocation] getCurrentAddress:^(NSMutableDictionary *citys) {
+//        NSLog(@"%@", citys);
+//    } error:^(NSError *error) {
+//        
+//    }];
+    
+//    [[MLGeolocation geolocation] getLocAddress:@"" withLon:@"" address:^(NSMutableDictionary *citys) {
+//        NSLog(@"%@", citys);
+//    } error:^(NSError *error) {
+//        
+//    }];
 }
 
 - (void)didReceiveMemoryWarning {
