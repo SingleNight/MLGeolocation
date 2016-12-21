@@ -51,7 +51,7 @@ typedef NS_ENUM(NSInteger, MLLocationDistance) {
 
 
 /**
- 获取坐标点的位置信息，字典包含lat(纬度)，long(经度)， country(国家)，State(省)，city(城市)，subLocality(城区)，thoroughfare(大道)，street(街道)
+ 获取坐标点的位置信息，字典包含lat(纬度)，long(经度)， Country(国家)，State(省)，City(城市)，SubLocality(城区)，Thoroughfare(大道)，SubThoroughfare(门牌号)  Street(街道)
  */
 - (void)getLocAddress:(NSString *)lat withLon:(NSString *)lon address:(void(^)(NSMutableDictionary *citys))address error:(void(^)(NSError *error))getFail;
 

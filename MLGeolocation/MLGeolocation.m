@@ -203,7 +203,8 @@ static MLGeolocation *geo;
             //逆编码完毕以后调用此block
             if (!error) {
                 CLPlacemark * placeMark = placemarks[0];
-                NSMutableDictionary *locDicationary = [[NSMutableDictionary alloc]initWithObjectsAndKeys:lat,@"lat", lon, @"long",placeMark.country,@"country", [placeMark.addressDictionary objectForKey:@"State"],@"State",placeMark.locality,@"city",placeMark.subLocality,@"subLocality",placeMark.thoroughfare,@"thoroughfare",placeMark.name,@"street",nil];
+                NSDictionary *locDic = placeMark.addressDictionary;
+                NSMutableDictionary *locDicationary = [[NSMutableDictionary alloc]initWithObjectsAndKeys:lat,@"lat", lon, @"long",placeMark.country,@"Country", [locDic objectForKey:@"State"],@"State",[locDic objectForKey:@"City"],@"Sity",[locDic objectForKey:@"SubLocality"],@"SubLocality",[locDic objectForKey:@"Thoroughfare"],@"Thoroughfare",[locDic objectForKey:@"SubThoroughfare"],@"SubThoroughfare",[locDic objectForKey:@"Street"],@"Street",nil];
                 address(locDicationary);
                 //获取当前地址城市名
             }else{

@@ -19,7 +19,7 @@
     [super viewDidLoad];
     
     //开启IP定位之前必须实现
-    //[[MLGeolocation geolocation] setIPAddress:@"" withAK:@""];
+    //[[MLGeolocation geolocation] setIPAddress:@"" withAK:@""];
     
 //    [[MLGeolocation geolocation] getCurrentCor:@"" block:^(CGFloat corLat, CGFloat corLon) {
 //        NSLog(@"%lf %lf", corLat, corLon);
